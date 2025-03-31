@@ -1,0 +1,25 @@
+server:
+  port: 8761
+
+app:
+  eureka:
+    hostname: ${EUREKA_HOSTNAME:localhost}
+    protocol: ${EUREKA_PROTOCOL:http}
+
+spring:
+  application:
+    name: eureka-server
+
+eureka:
+    client:
+      register-with-eureka: false
+      fetch-registry: false
+      service-url:
+        defaultZone: ${app.eureka.protocol}://${app.eureka.hostname}:8761/eureka/
+
+    instance:
+      hostname: ${app.eureka.hostname}
+      prefer-ip-address: false
+      status-page-url: ${app.eureka.protocol}://${app.eureka.hostname}:${server.port}/status
+      health-check-url: ${app.eureka.protocol}://${app.eureka.hostname}:${server.port}/actuator/health
+      home-page-url: ${app.eureka.protocol}://${app.eureka.hostname}:${server.port}

@@ -1,0 +1,61 @@
+server:
+  port: 8080
+
+app:
+  api-prefix: /api/v1
+  eureka:
+    hostname: ${EUREKA_HOSTNAME:localhost}
+    protocol: ${EUREKA_PROTOCOL:http}
+  auth:
+    protocol: ${AUTH_PROTOCOL:http}
+    context-path: ${AUTH_CONTEXT_PATH:/auth}
+
+spring:
+  application:
+    name: gateway-service
+#  config:
+#    import: configserver:http://localhost:8888 # thì tức là cái này đang gọi request tới /config-server để nó lấy cái cấu hình, config-server sẽ lấy cấu hình từ các file repo ở trên
+  cloud:
+    config:
+      enabled: false
+    gateway:
+      routes:
+        - id: identity-service
+          uri: lb://identity-service
+          predicates:
+            - Path=${app.api-prefix}/identity/** # build request cho api gateway
+          filters:
+            - TokenRelay=
+            - StripPrefix=2 # strip (cắt các phần đầu của request) để chuyển chúng sang các endpoint của service tương ứng
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=${app.api-prefix}/auth/**
+          filters:
+            - TokenRelay=
+            - StripPrefix=2
+        - id: identity-service
+          uri: lb://identity-service
+          predicates:
+            - Path=${app.api-prefix}/identity/** # build request cho api gateway
+          filters:
+            - TokenRelay=
+            - StripPrefix=2 # strip (cắt các phần đầu của request) để chuyển chúng sang các endpoint của service tương ứng
+        - id: testing-service-v1
+          uri: lb://testing-service-v1
+          predicates:
+            - Path=${app.api-prefix}/testing-api/**
+          filters:
+            - TokenRelay=
+            - StripPrefix=2
+
+jwt:
+  signerKey: ${JWT_SECRET_KEY:default_key} # dùng chung cho tất cả các service nội bộ
+  valid-duration: 600 # in second
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${app.eureka.protocol}://${app.eureka.hostname}:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true

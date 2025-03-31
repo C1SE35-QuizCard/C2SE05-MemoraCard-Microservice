@@ -1,0 +1,40 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /auth
+
+app:
+  eureka:
+    hostname: ${EUREKA_HOSTNAME:localhost}
+    protocol: ${EUREKA_PROTOCOL:http}
+
+spring:
+  application:
+    name: auth-service
+#  config:
+#    import: configserver:http://localhost:8888
+  cloud:
+    config:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  datasource:
+    url: ${DBMS_URL}
+    username: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+jwt:
+  authSignerKey: ${JWT_AUTH_SIGNER_KEY:default_key} # dùng riêng để trả về token cho client sử dụng
+#  signerKey: ${JWT_SECRET_KEY:default_key} # dùng chung cho tất cả các service nội bộ
+  valid-duration: 3600 # in second
+  refreshable-duration: 252000 # in seconds
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${app.eureka.protocol}://${app.eureka.hostname}:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true

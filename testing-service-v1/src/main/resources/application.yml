@@ -1,0 +1,29 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /testing-api
+
+app:
+  eureka:
+    hostname: ${EUREKA_HOSTNAME:localhost}
+    protocol: ${EUREKA_PROTOCOL:http}
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+  application:
+    name: testing-service-v1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${app.eureka.protocol}://${app.eureka.hostname}:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
