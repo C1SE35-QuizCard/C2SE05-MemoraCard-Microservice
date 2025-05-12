@@ -78,9 +78,9 @@ dependencyManagement {
 
 flyway {
 	// JDBC URL tới DB mà bạn muốn apply migrations
-	url      = project.findProperty('flyway.url')      ?: 'jdbc:mysql://localhost:3306/quizcards_demo?createDatabaseIfNotExist=true'
+	url      = project.findProperty('flyway.url')      ?: 'jdbc:mysql://localhost:3306/quizcards_demo_kien_1?createDatabaseIfNotExist=true'
 	user     = project.findProperty('flyway.user')     ?: 'root'
-	password = project.findProperty('flyway.password') ?: '0935304451An'
+	password = project.findProperty('flyway.password') ?: 'KiinGoldTRung0112'
 
 	// Nếu bạn đặt migrations trong thư mục khác, chỉ định lại
 	locations = ['classpath:db/migration']

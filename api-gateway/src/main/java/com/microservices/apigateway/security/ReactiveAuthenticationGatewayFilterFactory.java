@@ -78,6 +78,7 @@ public class ReactiveAuthenticationGatewayFilterFactory
 
             // Lấy JWT
             String bearer = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
             if (!StringUtils.hasText(bearer) || !bearer.startsWith("Bearer ")) {
                 return chain.filter(exchange);
             }

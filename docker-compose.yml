@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  redis:
+    image: bitnami/redis:7.2
+    container_name: redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  kafka:
+    image: bitnami/kafka:3.8
+    container_name: kafka
+    environment:
+      - KAFKA_HEAP_OPTS=-Xms1G\ -Xmx1G
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_NODE_ID=1
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - "127.0.0.1:9092:9092"
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - kafka_data:/bitnami/kafka
+    restart: unless-stopped
+
+  temporal:
+    image: temporalio/auto-setup:latest
+    container_name: temporal
+    ports:
+      - "7233:7233"      # gRPC endpoint
+    restart: unless-stopped
+
+  temporal-web:
+    image: temporalio/web:latest
+    container_name: temporal-web
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_UI_PORT=8090  # đổi port nội bộ container từ 8080 → 8090
+    ports:
+      - "8090:8090"     # host:container = 8090:8090
+    depends_on:
+      - temporal
+    restart: unless-stopped
+
+volumes:
+  kafka_data:
