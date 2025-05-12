@@ -8,7 +8,9 @@ import com.microservices.apigateway.utils.EndpointUtils;
 import com.microservices.security.model.UserInfo;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +29,10 @@ import java.util.*;
 public class ReactiveAuthenticationGatewayFilterFactory
         extends AbstractGatewayFilterFactory<ReactiveAuthenticationGatewayFilterFactory.Config> {
     SecurityClient securityClient;
+
+    @Value("${app.api-prefix-v1}")
+    @NonFinal
+    String apiPrefixV1;
 
     public static class Config {
         // nếu cần thêm property, khai báo ở đây
@@ -50,7 +56,7 @@ public class ReactiveAuthenticationGatewayFilterFactory
 
     private boolean isAuthEndpoint(ServerHttpRequest request) {
         return Arrays.stream(authEndpointsRegex)
-                .anyMatch(s -> request.getURI().getPath().matches(s));
+                .anyMatch(s -> request.getURI().getPath().matches(apiPrefixV1 + s));
     }
 
     @Override
