@@ -1,5 +1,2 @@
-.env
 .idea
-build/
-.gradle
-.vscode/
+.env
