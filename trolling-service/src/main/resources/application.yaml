@@ -1,0 +1,29 @@
+server:
+  port: 8083
+  servlet:
+    context-path: ${API_PREFIX_V1}/trolling
+
+spring:
+  webflux:
+    base-path: ${API_PREFIX_V1}/trolling
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
+  application:
+    name: trolling-service
+  config:
+    import: optional:file:.env[.properties]
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_ZONE_HTTP_METHOD:http}://${eureka.instance.hostname}:${EUREKA_SERVER_PORT}/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true # Gửi IP thay vì hostname cho Eureka
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}

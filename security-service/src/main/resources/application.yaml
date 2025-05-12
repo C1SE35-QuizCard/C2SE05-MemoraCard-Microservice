@@ -1,0 +1,64 @@
+server:
+  port: 8081
+  servlet:
+    context-path: ${API_PREFIX_INSIGHTS}/security
+
+spring:
+  webflux:
+    base-path: ${API_PREFIX_INSIGHTS}/security # chỉ áp dụng nếu có spring webflux
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
+  application:
+    name: security-service
+  config:
+    import: optional:file:.env[.properties]
+  r2dbc:
+    url: ${R2DBC_URL}
+    username: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    url: ${DBMS_URL}
+    user: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
+    baseline-on-migrate: true
+  data:
+    redis:
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      connect-timeout: ${REDIS_CONNECT_TIMEOUT}
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_ZONE_HTTP_METHOD:http}://${eureka.instance.hostname}:${EUREKA_SERVER_PORT}/eureka/
+#      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true # Gửi IP thay vì hostname cho Eureka
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+
+jwt:
+  secret: ${SECRET_KEY}
+
+redis_config:
+  token_blacklist_prefix: TOKEN_BLACKLIST
+  token_iat_prefix: TOKEN_IAT_AVAILABLE
+
+management:
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true

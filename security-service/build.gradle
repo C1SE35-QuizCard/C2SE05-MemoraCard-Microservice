@@ -1,0 +1,91 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		// Cho Flyway plugin biết cách xử lý MySQL
+		classpath "org.flywaydb:flyway-mysql:10.13.0"
+		// JDBC driver MySQL
+		classpath "com.mysql:mysql-connector-j:8.0.33"
+	}
+}
+
+
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.11'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.flywaydb.flyway' version '10.13.0'
+}
+
+
+group = 'com.microservices'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	mavenLocal()
+	maven { url 'https://jitpack.io' }
+	maven { url 'https://repo.spring.io/release' }
+}
+
+ext {
+	set('springCloudVersion', "2023.0.5")
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+	implementation 'dev.miku:r2dbc-mysql:0.8.2.RELEASE'
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-mysql'
+	implementation 'com.github.lkienkle11:shared-common-classes:v0.1.6'
+	implementation 'com.github.lkienkle11:reactive-redis-utils:v0.1.2'
+	implementation 'com.github.lkienkle11:jwt-token-provider:v0.1.2'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+flyway {
+	// JDBC URL tới DB mà bạn muốn apply migrations
+	url      = project.findProperty('flyway.url')      ?: 'jdbc:mysql://localhost:3306/quizcards_demo?createDatabaseIfNotExist=true'
+	user     = project.findProperty('flyway.user')     ?: 'root'
+	password = project.findProperty('flyway.password') ?: '0935304451An'
+
+	// Nếu bạn đặt migrations trong thư mục khác, chỉ định lại
+	locations = ['classpath:db/migration']
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
