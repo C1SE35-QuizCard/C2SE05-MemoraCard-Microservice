@@ -1,8 +1,6 @@
 package com.microservices.securityservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.microservices.security.model.IAppUserInfo;
-import jakarta.validation.constraints.NotNull;
+import com.microservices.dto.security.IAppUserInfo;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;

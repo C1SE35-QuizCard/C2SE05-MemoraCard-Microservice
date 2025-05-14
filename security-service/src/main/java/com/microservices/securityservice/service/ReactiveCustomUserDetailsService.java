@@ -1,6 +1,7 @@
 package com.microservices.securityservice.service;
 
-import com.microservices.security.model.UserPrincipal;
+
+import com.microservices.dto.security.UserPrincipal;
 import com.microservices.securityservice.model.AppRole;
 import com.microservices.securityservice.repository.AppRoleRepository;
 import com.microservices.securityservice.repository.AppUserRepository;

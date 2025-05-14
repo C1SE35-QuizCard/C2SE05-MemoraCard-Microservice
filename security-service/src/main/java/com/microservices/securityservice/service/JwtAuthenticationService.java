@@ -1,8 +1,9 @@
 package com.microservices.securityservice.service;
 
+import com.microservices.dto.security.UserInfo;
+import com.microservices.dto.security.UserPrincipal;
 import com.microservices.security.JwtTokenProvider;
-import com.microservices.security.model.UserInfo;
-import com.microservices.security.model.UserPrincipal;
+
 import com.microservices.securityservice.utils.TokenUtils;
 import com.microservices.utils.ReactiveRedisUtils;
 import io.jsonwebtoken.ExpiredJwtException;

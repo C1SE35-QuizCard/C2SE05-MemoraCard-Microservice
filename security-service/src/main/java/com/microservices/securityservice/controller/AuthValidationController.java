@@ -1,6 +1,7 @@
 package com.microservices.securityservice.controller;
 
-import com.microservices.security.model.UserInfo;
+
+import com.microservices.dto.security.UserInfo;
 import com.microservices.securityservice.service.JwtAuthenticationService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
