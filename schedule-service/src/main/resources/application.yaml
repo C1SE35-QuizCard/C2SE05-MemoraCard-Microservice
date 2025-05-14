@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: schedule-service
+  config:
+    import: optional:file:.env[.properties]
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  temporal:
+    namespace: ${TEMPORAL_NAMESPACE:default}
+
+    connection:
+      target: ${TEMPORAL_HOST:localhost}:${TEMPORAL_PORT:7233}
+
+    workers:
+      - task-queue: notification-schedule-queue
+        capacity:
+          max-concurrent-activity-executors: 5
+          max-concurrent-workflow-task-executors: 3
+      - rate-limits:
+          max-worker-activities-per-second: 10
+          max-task-queue-activities-per-second: 100
+
+    workflow-cache:
+      max-instances: 1
+      max-threads: 2
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_ZONE_HTTP_METHOD:http}://${eureka.instance.hostname}:${EUREKA_SERVER_PORT}/eureka/
+    #      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true # Gửi IP thay vì hostname cho Eureka
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+
+management:
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true

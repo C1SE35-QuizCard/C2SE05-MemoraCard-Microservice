@@ -1,0 +1,5 @@
+FROM temporalio/auto-setup:1.27.2
+# Tạo thư mục và copy file config vào đúng chỗ
+RUN mkdir -p /etc/temporal/config/dynamicconfig
+COPY ./dynamicconfig/development-sql.yaml \
+     /etc/temporal/config/dynamicconfig/development-sql.yaml

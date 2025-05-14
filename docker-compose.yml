@@ -4,6 +4,8 @@ services:
   redis:
     image: bitnami/redis:7.2
     container_name: redis
+    networks:
+      - microservices-network
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
@@ -13,8 +15,11 @@ services:
   kafka:
     image: bitnami/kafka:3.8
     container_name: kafka
+    networks:
+      - temporal-network
+      - microservices-network
     environment:
-      - KAFKA_HEAP_OPTS=-Xms1G\ -Xmx1G
+      - KAFKA_HEAP_OPTS=-Xms1G -Xmx1G
       - KAFKA_PROCESS_ROLES=broker,controller
       - KAFKA_NODE_ID=1
       - KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093
@@ -27,27 +32,110 @@ services:
       - "127.0.0.1:9092:9092"
       - "127.0.0.1:9093:9093"
     volumes:
+      #      - ./kafka_data:/bitnami/kafka
       - kafka_data:/bitnami/kafka
     restart: unless-stopped
 
-  temporal:
-    image: temporalio/auto-setup:latest
-    container_name: temporal
-    ports:
-      - "7233:7233"      # gRPC endpoint
-    restart: unless-stopped
-
-  temporal-web:
-    image: temporalio/web:latest
-    container_name: temporal-web
+  elasticsearch:
+    container_name: temporal-elasticsearch
     environment:
+      - cluster.routing.allocation.disk.threshold_enabled=true
+      - cluster.routing.allocation.disk.watermark.low=512mb
+      - cluster.routing.allocation.disk.watermark.high=256mb
+      - cluster.routing.allocation.disk.watermark.flood_stage=128mb
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - xpack.security.enabled=false
+    image: elasticsearch:7.17.27
+    networks:
+      - temporal-network
+      - microservices-network
+    expose:
+      - 9200
+    volumes:
+      - /usr/share/elasticsearch/data
+
+  postgresql:
+    container_name: temporal-postgresql
+    environment:
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_USER: temporal
+    image: postgres:16
+    networks:
+      - temporal-network
+      - microservices-network
+    expose:
+      - 5432
+    volumes:
+      - /usr/share/postgresql/data
+
+  temporal:
+    build:
+      context: .
+      dockerfile: Dockerfile_Temporal
+    container_name: temporal
+    depends_on:
+      - postgresql
+      - elasticsearch
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=/etc/temporal/config/dynamicconfig/development-sql.yaml
+      - ENABLE_ES=true
+      - ES_SEEDS=elasticsearch
+      - ES_VERSION=v7
       - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_UI_PORT=8090  # đổi port nội bộ container từ 8080 → 8090
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+    #    image: temporalio/auto-setup:1.27.2
+    networks:
+      - temporal-network
+      - microservices-network
     ports:
-      - "8090:8090"     # host:container = 8090:8090
+      - "7233:7233"
+  #    volumes:
+  #      - ./dynamicconfig:/etc/temporal/config/dynamicconfig
+  #      - dynamicconfig:/etc/temporal/config/dynamicconfig
+
+  temporal-admin-tools:
+    container_name: temporal-admin-tools
     depends_on:
       - temporal
-    restart: unless-stopped
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+    image: temporalio/admin-tools:${TEMPORAL_ADMINTOOLS_VERSION}
+    networks:
+      - temporal-network
+    stdin_open: true
+    tty: true
+
+  temporal-ui:
+    container_name: temporal-ui
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+      - TEMPORAL_UI_PORT=8099
+    image: temporalio/ui:${TEMPORAL_UI_VERSION}
+    networks:
+      - temporal-network
+    ports:
+      - "8099:8099"
 
 volumes:
   kafka_data:
+#  dynamicconfig:
+
+networks:
+  microservices-network:
+    #    external: true -- tự tạo thủ công bên ngoài bằng lệnh podman network create
+    driver: bridge # -- podman tự tạo
+    name: microservices-network
+
+  temporal-network:
+    driver: bridge
+    name: temporal-network

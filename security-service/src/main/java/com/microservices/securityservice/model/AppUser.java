@@ -71,6 +71,9 @@ public class AppUser implements Serializable, IAppUserInfo {
     @Column("role_id")
     private Long roleId;
 
+    @Column("user_tz")
+    private String userTz;
+
     @Override
     public String getUserName() {
         return username;

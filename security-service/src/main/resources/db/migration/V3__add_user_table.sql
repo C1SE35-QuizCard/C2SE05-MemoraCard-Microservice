@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `app_users` (
                              `phone_number` varchar(255) DEFAULT NULL,
                              `user_code` varchar(255) DEFAULT NULL,
                              `user_name` varchar(50) NOT NULL,
+                             `user_tz` varchar(9) default 'Z',
                              `role_id` bigint DEFAULT NULL,
                              PRIMARY KEY (`user_id`),
                              UNIQUE KEY `UKcdpifjw6dh83f6du6wxeo1xip` (`user_name`),

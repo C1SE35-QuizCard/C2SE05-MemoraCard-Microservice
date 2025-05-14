@@ -52,7 +52,7 @@ dependencies {
 	implementation 'dev.miku:r2dbc-mysql:0.8.2.RELEASE'
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-mysql'
-	implementation 'com.github.lkienkle11:shared-common-classes:v0.1.6'
+	implementation 'com.github.lkienkle11:shared-common-classes:v0.1.7'
 	implementation 'com.github.lkienkle11:reactive-redis-utils:v0.1.2'
 	implementation 'com.github.lkienkle11:jwt-token-provider:v0.1.2'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
