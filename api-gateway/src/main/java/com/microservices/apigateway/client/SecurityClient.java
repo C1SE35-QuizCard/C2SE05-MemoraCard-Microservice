@@ -1,7 +1,6 @@
 package com.microservices.apigateway.client;
 
-import com.microservices.dto.request.ValidateRequest;
-import com.microservices.security.model.UserInfo;
+import com.microservices.dto.security.UserInfo;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

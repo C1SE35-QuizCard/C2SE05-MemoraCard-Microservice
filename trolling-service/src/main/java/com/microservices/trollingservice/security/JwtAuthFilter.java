@@ -1,6 +1,7 @@
 package com.microservices.trollingservice.security;
 
-import com.microservices.security.model.UserPrincipal;
+
+import com.microservices.dto.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;

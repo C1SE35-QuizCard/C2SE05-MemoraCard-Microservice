@@ -5,7 +5,8 @@ import com.microservices.apigateway.client.SecurityClient;
 import com.microservices.apigateway.configuration.UrlFilter;
 import com.microservices.apigateway.exception.ErrorHandler;
 import com.microservices.apigateway.utils.EndpointUtils;
-import com.microservices.security.model.UserInfo;
+
+import com.microservices.dto.security.UserInfo;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
