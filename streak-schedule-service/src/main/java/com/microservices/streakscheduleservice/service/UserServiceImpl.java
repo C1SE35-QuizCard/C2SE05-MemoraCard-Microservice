@@ -1,9 +1,9 @@
-package com.microservices.scheduleservice.service;
+package com.microservices.streakscheduleservice.service;
 
 
-import com.microservices.scheduleservice.dto.UserWithStreakAnalysisDTO;
-import com.microservices.scheduleservice.model.AppUser;
-import com.microservices.scheduleservice.repository.AppUserRepository;
+import com.microservices.streakscheduleservice.dto.UserWithStreakAnalysisDTO;
+import com.microservices.streakscheduleservice.model.AppUser;
+import com.microservices.streakscheduleservice.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;

@@ -20,18 +20,60 @@ spring:
     import: optional:file:.env[.properties]
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+              - "https://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
       routes:
-        - id: quizcards_general_service
-          uri: lb://quizcards
+        - id: notification_service
+          uri: lb://notification-service
           predicates:
-            - Path=${app.api-prefix-v1}/**
+            - Path=${app.api-prefix-v1}/notification/**
           filters:
             - name: ReactiveAuthentication
+            - name: StripPrefix
+              args:
+                parts: 2
+            - name: PrefixPath
+              args:
+                prefix: /api/v1/ms
+
+
+        - id: notification_testing_service
+          uri: lb://notification-service-for-testing
+          predicates:
+            - Path=${app.api-prefix-v1}/notification-testing/**
+          filters:
+            - name: ReactiveAuthentication
+            - name: StripPrefix
+              args:
+                parts: 2
+            - name: PrefixPath
+              args:
+                prefix: /api/v1/ms
 
         - id: quizcards_ws_auth
           uri: lb://quizcards
           predicates:
             - Path=${app.api-prefix}/ws/**, ${app.api-prefix}/auth/**
+          filters:
+            - name: ReactiveAuthentication
+
+        - id: quizcards_general_service
+          uri: lb://quizcards
+          predicates:
+            - Path=${app.api-prefix-v1}/**
           filters:
             - name: ReactiveAuthentication
 

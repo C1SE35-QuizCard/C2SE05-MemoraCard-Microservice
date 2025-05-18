@@ -1,4 +1,5 @@
 package com.microservices.securityservice.dto;
 
-public class TokenValidationResult {
-}
+import com.microservices.dto.security.UserInfo;
+
+public record TokenValidationResult(UserInfo userInfo, String jti) { }

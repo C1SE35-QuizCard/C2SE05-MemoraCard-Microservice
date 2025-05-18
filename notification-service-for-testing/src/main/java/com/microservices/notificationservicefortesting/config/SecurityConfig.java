@@ -1,6 +1,5 @@
-package com.microservices.notificationservice.config;
+package com.microservices.notificationservicefortesting.config;
 
-import com.microservices.notificationservice.security.ProfileFilter;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,7 +19,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @EnableReactiveMethodSecurity
 public class SecurityConfig {
-    ProfileFilter profileFilter;
+    com.microservices.notificationservicefortesting.security.ProfileFilter profileFilter;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {

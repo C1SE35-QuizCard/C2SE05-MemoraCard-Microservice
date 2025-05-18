@@ -1,11 +1,13 @@
-package com.microservices.scheduleservice.event;
+package com.microservices.streakscheduleservice.event;
 
 import com.microservices.dto.notification.StreakNotificationData;
 import com.microservices.dto.security.UserInfo;
-import com.microservices.scheduleservice.service.PushSubscriptionService;
-import com.microservices.scheduleservice.service.UserDailyNotiWf;
+import com.microservices.streakscheduleservice.service.PushSubscriptionService;
+import com.microservices.streakscheduleservice.service.UserDailyNotiWf;
 import io.temporal.client.WorkflowClient;
+import io.temporal.client.WorkflowExecutionAlreadyStarted;
 import io.temporal.client.WorkflowOptions;
+import io.temporal.client.WorkflowStub;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -16,6 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.time.ZoneId;
 
 @Component
 @RequiredArgsConstructor
@@ -47,45 +52,62 @@ public class StudyKafkaListener {
         }
 
         String workflowId = workflowIdPrefix + uid;
-        UserDailyNotiWf stub = client.newWorkflowStub(
+
+        WorkflowOptions opts = WorkflowOptions.newBuilder()
+                .setWorkflowId(workflowId)
+                .setTaskQueue(taskQueueName)
+                .build();
+
+        var stub = client.newWorkflowStub(
                 UserDailyNotiWf.class,
-                WorkflowOptions.newBuilder()
-                        .setWorkflowId(workflowId)
-                        .setTaskQueue(taskQueueName)
-                        .build()
-        );
+                opts);
+
+        String tz = data.getPayload().get("user_tz").toString();
+
+        // convert tz to offset
+        int off = ZoneId.of(tz).getRules().getOffset(Instant.now()).getTotalSeconds();
 
         try {
-            // 2) Chỉ signal — không start mới
+            WorkflowClient.start(stub::runWithInit, uid, off, true, null, null);
+        } catch (WorkflowExecutionAlreadyStarted we) {
+            log.info("Workflow already started: {}", we.getMessage());
+            log.info("Updating data: {}", data);
             stub.markStudied(
-                    uid,
+                    data.getUserId(),
                     data.getLastDateLearned(),
                     data.getCurrentStreak()
             );
-            log.info("signal markStudied to {}", workflowId);
-            ack.acknowledge();
-        } catch (io.temporal.client.WorkflowNotFoundException e) {
-            // workflow chưa tồn tại → bỏ qua nhẹ
-            log.warn("workflow {} not found → ignore learning-done event", workflowId);
             ack.acknowledge();
         } catch (Exception e) {
-            // lỗi khác → retry theo DLT policy
-            log.error("error signaling {}: {}", workflowId, e.getMessage());
+            log.error("Error starting workflow: {}", e.getMessage());
             throw e;
         }
     }
 
     @KafkaListener(topics = "register-streak-notification", groupId = "group-consumer-email-notification")
-    public void registerPushSubscription(UserInfo userInfo) {
+    public void registerPushSubscription(UserInfo userInfo,
+                                         Acknowledgment ack) {
         try {
+            System.out.println("Listened...");
             pushSubscriptionService.subscribe(userInfo.getId(), userInfo.getUserTz());
+            ack.acknowledge();
         } catch (Exception e) {
             log.error("Error starting workflow: {}", e.getMessage());
+            throw e;
         }
     }
 
     @KafkaListener(topics = "unregister-streak-notification", groupId = "group-consumer-email-notification")
-    public void unregisterPushSubscription(UserInfo userInfo) {
+    public void unregisterPushSubscription(UserInfo userInfo,
+                                           Acknowledgment ack) {
         // nothing to do
+        ack.acknowledge();
+    }
+
+    @KafkaListener(topics = "streak-notification-done", groupId = "group-consumer-email-notification")
+    public void streakNotificationGotDone(StreakNotificationData data,
+                                          Acknowledgment ack) {
+        // nothing to do
+        ack.acknowledge();
     }
 }

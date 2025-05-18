@@ -1,4 +1,3 @@
 package com.microservices.notificationservice.dto;
 
-public class AckRequest {
-}
+public record AckRequest(String sagaId) {}

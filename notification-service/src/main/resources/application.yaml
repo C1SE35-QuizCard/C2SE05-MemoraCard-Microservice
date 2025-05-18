@@ -1,0 +1,45 @@
+server:
+  port: 8087
+  servlet:
+    context-path: ${API_PREFIX_V1}/ms/notification
+
+spring:
+  webflux:
+    base-path: ${API_PREFIX_V1}/ms/notification
+  application:
+    name: notification-service
+  config:
+    import: optional:file:.env[.properties]
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
+  data:
+    redis:
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      connect-timeout: ${REDIS_CONNECT_TIMEOUT}
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE}
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/}
+      database: ${MONGODB_DB:quizcard_db}
+      auto-index-creation: true
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_ZONE_HTTP_METHOD:http}://${eureka.instance.hostname}:${EUREKA_SERVER_PORT}/eureka/
+    #      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true # Gửi IP thay vì hostname cho Eureka
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}

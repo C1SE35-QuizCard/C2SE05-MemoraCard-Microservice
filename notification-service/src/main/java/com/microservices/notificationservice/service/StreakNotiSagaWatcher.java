@@ -2,6 +2,7 @@ package com.microservices.notificationservice.service;
 
 import com.microservices.dto.notification.NotificationSagaRecord;
 import com.microservices.dto.notification.StreakNotificationData;
+import com.microservices.notificationservice.model.NotificationEntry;
 import com.microservices.utils.ReactiveRedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,14 +13,17 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SagaWatcher {
+public class StreakNotiSagaWatcher {
 
     /* constructor-injected (nhớ thêm @EnableScheduling ở @SpringBootApplication) */
     private final ReactiveRedisTemplate<String, Object> redis;
     private final SseService sse;
+    private final NotificationCRUDService notiService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     /**
@@ -27,7 +31,7 @@ public class SagaWatcher {
      */
     @Scheduled(fixedDelay = 5_000)
     public void scan() {
-
+        System.out.println("scan saga pending...");
         double nowScore = System.currentTimeMillis();          // millis → double
         Range<Double> range = Range.leftOpen(0.0, nowScore);   // (0, now]
 
@@ -45,6 +49,7 @@ public class SagaWatcher {
 
         return redis.opsForValue()
                 .get("saga:" + sagaId + ":ack")
+//                .get("saga:" + sagaId)
                 .hasElement()                              // Mono<Boolean>
                 .flatMap(hasAck ->
                         hasAck ? cleanup(sagaId, true)
@@ -55,14 +60,13 @@ public class SagaWatcher {
      * Retry nếu chưa quá 3 lần; quá → drop
      */
     private Mono<Void> retryOrDrop(String sagaId) {
-
         return redis.opsForValue()
                 .get("saga:" + sagaId)                    // lấy bản ghi saga
                 .cast(NotificationSagaRecord.class)
                 .flatMap(saga -> {
 
                     if (saga.getAttempt() >= 3) {
-                        log.warn("Saga {} drop sau {} lần retry",
+                        log.warn("Saga {} drop after {} times retry",
                                 sagaId, saga.getAttempt());
                         return cleanup(sagaId, false);
                     }
@@ -80,27 +84,31 @@ public class SagaWatcher {
      * Thu gom – successAck==true thì bắn sự kiện done lên Kafka
      */
     private Mono<Void> cleanup(String sagaId, boolean successAck) {
-
         ReactiveRedisUtils utils = new ReactiveRedisUtils(redis);
+        String dataKey = "data_streak:" + sagaId;
 
-        Mono<Void> kafkaSend =
-                successAck
-                        ? Mono.fromFuture(
-                        kafkaTemplate.send("streak_notification_done",
-                                sagaId,           // key (tuỳ chọn)
-                                utils.getFromRedis("data_streak:" + sagaId,
-                                        StreakNotificationData.class))
-                ).then()
-                        : Mono.empty();
+        return utils.getFromRedis(dataKey, StreakNotificationData.class)
+                .flatMap(streakData -> {
+                    // Nếu successAck thì tạo notification rồi chuyển sang Mono<Void>, ngược lại empty
+//                    Mono<Void> sendAck = successAck
+//                            ? notiService.create(
+//                            streakData.getUserId(),
+//                            NotificationEntry.builder()
+//                                    .message(streakData.getMessage())
+//                                    .payload(Map.of("userId", streakData.getUserId()))
+//                                    .build()
+//                    ).then()
+//                            : Mono.empty();
 
-        return redis.opsForZSet().remove("saga:pending", sagaId)
-                .then(redis.delete("saga:" + sagaId))
-                .then(redis.delete("saga:" + sagaId + ":ack"))
-                .then(utils.getFromRedis("data_streak:" + sagaId,
-                                StreakNotificationData.class)
-                        .then(kafkaSend))             // gửi Kafka nếu cần
-                .then(redis.delete("data_streak:" + sagaId))
-                .doOnSuccess(v -> log.info("Saga {} cleanup xong", sagaId))
-                .then();
+                    return redis.opsForZSet().remove("saga:pending", sagaId)
+                            .then(redis.delete("saga:" + sagaId))
+                            .then(redis.delete("saga:" + sagaId + ":ack"))
+//                            .then(sendAck)               // bắn sự kiện nếu cần
+                            .then(redis.delete(dataKey)) // xóa data_streak
+                            .doOnSuccess(v ->
+                                    log.info("Saga {} cleanup done", sagaId)
+                            )
+                            .then();
+                });
     }
 }

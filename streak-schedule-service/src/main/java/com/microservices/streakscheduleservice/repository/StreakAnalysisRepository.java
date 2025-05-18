@@ -1,10 +1,8 @@
-package com.microservices.scheduleservice.repository;
+package com.microservices.streakscheduleservice.repository;
 
-import com.microservices.scheduleservice.model.StreakAnalysis;
-import org.springframework.data.r2dbc.repository.Query;
+import com.microservices.streakscheduleservice.model.StreakAnalysis;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository

@@ -1,4 +1,4 @@
-package com.microservices.scheduleservice.dto;
+package com.microservices.streakscheduleservice.dto;
 
 import java.time.LocalDate;
 

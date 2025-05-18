@@ -1,4 +1,4 @@
-package com.microservices.scheduleservice.utils;
+package com.microservices.streakscheduleservice.utils;
 
 import com.microservices.dto.notification.StreakNotificationData;
 import org.springframework.data.domain.Range;
@@ -29,8 +29,8 @@ public class UtilsFn {
         return rs;
     }
 
-    public static Instant nextXhXm(int offsetSec, int hours, int minutes) {
-        ZonedDateTime localNow = Instant.now()
+    public static Instant nextXhXm(Instant current, int offsetSec, int hours, int minutes) {
+        ZonedDateTime localNow = current
                 .atZone(ZoneOffset.ofTotalSeconds(offsetSec));
         ZonedDateTime nextTime = localNow.withHour(hours).withMinute(minutes)
                 .withSecond(0).withNano(0);
@@ -86,10 +86,10 @@ public class UtilsFn {
             "Streak: %d days. Don’t stop now—just one flashcard today keeps the streak alive!"
     );
 
-    public static StreakNotificationData buildNotiMessage(Long userId, Long streakCount, LocalDate lastDateLearned) {
+    public static StreakNotificationData buildNotiMessage(String userId, Long streakCount, LocalDate lastDateLearned) {
         String template = MESSAGE_TEMPLATES.get(ThreadLocalRandom.current().nextInt(MESSAGE_TEMPLATES.size()));
         StreakNotificationData noti = new StreakNotificationData();
-        noti.setUserId(userId.toString());
+        noti.setUserId(userId);
         noti.setCurrentStreak(streakCount);
         noti.setMessage(String.format(template, streakCount));
         noti.setLastDateLearned(lastDateLearned);

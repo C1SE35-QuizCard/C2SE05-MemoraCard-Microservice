@@ -1,4 +1,4 @@
-package com.microservices.scheduleservice;
+package com.microservices.streakscheduleservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

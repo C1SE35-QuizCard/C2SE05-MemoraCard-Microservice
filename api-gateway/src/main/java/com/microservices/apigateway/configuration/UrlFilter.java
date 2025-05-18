@@ -49,7 +49,8 @@ public class UrlFilter {
 
     // vứt cmn cái cũ rồi
     public static String[] authEndpoints = {
-
+            "/notification/**",
+            "/notification-testing/**",
     };
 
     public static String[] publicEndpoints = new String[]

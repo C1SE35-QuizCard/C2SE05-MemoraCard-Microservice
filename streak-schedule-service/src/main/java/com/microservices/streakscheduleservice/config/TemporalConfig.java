@@ -1,19 +1,21 @@
-package com.microservices.scheduleservice.config;
+package com.microservices.streakscheduleservice.config;
 
-import com.microservices.scheduleservice.service.ISendNotification;
-import com.microservices.scheduleservice.service.InitStreakActivity;
-import com.microservices.scheduleservice.service.UserDailyNotiWfImpl;
+import com.microservices.streakscheduleservice.service.ISendNotification;
+import com.microservices.streakscheduleservice.service.InitStreakActivity;
+import com.microservices.streakscheduleservice.service.UserDailyNotiWfImpl;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowClientOptions;
 import io.temporal.client.schedules.ScheduleClient;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.serviceclient.WorkflowServiceStubsOptions;
+import io.temporal.spring.boot.autoconfigure.RootNamespaceAutoConfiguration;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -21,6 +23,7 @@ import org.springframework.context.event.EventListener;
 
 @Configuration
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EnableAutoConfiguration(exclude = RootNamespaceAutoConfiguration.class)
 public class TemporalConfig {
     @Value("${spring.temporal.connection.target:127.0.0.1:7233}") // Địa chỉ Temporal server
     String temporalServiceAddress;

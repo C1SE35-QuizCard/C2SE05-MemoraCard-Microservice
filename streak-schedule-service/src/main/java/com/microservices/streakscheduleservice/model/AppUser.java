@@ -1,4 +1,4 @@
-package com.microservices.scheduleservice.model;
+package com.microservices.streakscheduleservice.model;
 
 import com.microservices.dto.security.IAppUserInfo;
 import lombok.*;

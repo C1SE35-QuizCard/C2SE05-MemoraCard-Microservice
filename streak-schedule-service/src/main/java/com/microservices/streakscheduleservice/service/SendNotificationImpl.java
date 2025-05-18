@@ -1,4 +1,4 @@
-package com.microservices.scheduleservice.service;
+package com.microservices.streakscheduleservice.service;
 
 import com.microservices.dto.notification.StreakNotificationData;
 import lombok.AccessLevel;
@@ -7,8 +7,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor

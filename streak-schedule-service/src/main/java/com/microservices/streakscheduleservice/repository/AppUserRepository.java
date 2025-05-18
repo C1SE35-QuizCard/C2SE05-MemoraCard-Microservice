@@ -1,7 +1,7 @@
-package com.microservices.scheduleservice.repository;
+package com.microservices.streakscheduleservice.repository;
 
-import com.microservices.scheduleservice.dto.UserWithStreakAnalysisDTO;
-import com.microservices.scheduleservice.model.AppUser;
+import com.microservices.streakscheduleservice.dto.UserWithStreakAnalysisDTO;
+import com.microservices.streakscheduleservice.model.AppUser;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;

@@ -1,4 +1,4 @@
-package com.microservices.scheduleservice.config;
+package com.microservices.streakscheduleservice.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

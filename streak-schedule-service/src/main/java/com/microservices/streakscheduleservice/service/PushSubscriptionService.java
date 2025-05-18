@@ -1,4 +1,4 @@
-package com.microservices.scheduleservice.service;
+package com.microservices.streakscheduleservice.service;
 
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowExecutionAlreadyStarted;
@@ -45,12 +45,13 @@ public class PushSubscriptionService {
                         .build());
 
         try {
-            WorkflowClient.start(stub::run, uid, off);
+            WorkflowClient.start(stub::runWithInit, uid, off, true, null, null);
         } catch (WorkflowExecutionAlreadyStarted we) {
             log.info("Workflow already started: {}", we.getMessage());
             stub.updateTz(tz);
         } catch (Exception e) {
             log.error("Error starting workflow: {}", e.getMessage());
+            throw e;
         }
     }
 }

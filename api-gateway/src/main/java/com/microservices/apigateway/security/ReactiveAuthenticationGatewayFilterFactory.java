@@ -5,7 +5,6 @@ import com.microservices.apigateway.client.SecurityClient;
 import com.microservices.apigateway.configuration.UrlFilter;
 import com.microservices.apigateway.exception.ErrorHandler;
 import com.microservices.apigateway.utils.EndpointUtils;
-
 import com.microservices.dto.security.UserInfo;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -89,6 +88,17 @@ public class ReactiveAuthenticationGatewayFilterFactory
                         UserInfo userInfo = resp.getBody();
                         HttpStatus status = (HttpStatus) resp.getStatusCode();
 
+                        System.out.println("X-Token-ID: " + resp.getHeaders().get("X-Token-ID"));
+
+                        if (Objects.requireNonNull(resp.getHeaders().get("X-Token-ID")).isEmpty() ||
+                                Objects.requireNonNull(resp.getHeaders().get("X-Token-ID")).getFirst().isBlank()) {
+                            return ErrorHandler.handleAuthenticationError(
+                                    exchange.getResponse(),
+                                    "Token ID not found",
+                                    HttpStatus.UNAUTHORIZED
+                            );
+                        }
+
                         if (userInfo == null) {
                             return ErrorHandler.handleAuthenticationError(
                                     exchange.getResponse(),
@@ -113,7 +123,8 @@ public class ReactiveAuthenticationGatewayFilterFactory
                         }
 
                         // Gắn headers và auth
-                        ServerHttpRequest mutated = mutateRequestWithHeaders(request, userInfo);
+                        ServerHttpRequest mutated = mutateRequestWithHeaders(request, userInfo,
+                                Objects.requireNonNull(resp.getHeaders().get("X-Token-ID")).getFirst());
 
                         return chain.filter(exchange.mutate().request(mutated).build());
                     })
@@ -139,7 +150,7 @@ public class ReactiveAuthenticationGatewayFilterFactory
     }
 
     private ServerHttpRequest mutateRequestWithHeaders(
-            ServerHttpRequest request, UserInfo userInfo) {
+            ServerHttpRequest request, UserInfo userInfo, String jti) {
         ServerHttpRequest.Builder b = request.mutate();
         b.header("X-User-Id", String.valueOf(userInfo.getId()));
         b.header("X-Username", userInfo.getUserName());
@@ -156,6 +167,8 @@ public class ReactiveAuthenticationGatewayFilterFactory
         b.header("X-User-Email", userInfo.getEmail());
         b.header("X-User-PhoneNumber", userInfo.getPhoneNumber());
         b.header("X-User-Address", userInfo.getAddress());
+        b.header("X-User-UserTz", userInfo.getUserTz());
+        b.header("X-Token-ID", jti);
         return b.build();
     }
 

@@ -1,6 +1,6 @@
-package com.microservices.scheduleservice.repository;
+package com.microservices.streakscheduleservice.repository;
 
-import com.microservices.scheduleservice.model.StreakDetails;
+import com.microservices.streakscheduleservice.model.StreakDetails;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;

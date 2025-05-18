@@ -1,20 +1,20 @@
-package com.microservices.scheduleservice.service;
+package com.microservices.streakscheduleservice.service;
 
-import com.microservices.scheduleservice.utils.UtilsFn;
+import com.microservices.dto.notification.StreakNotificationData;
+import com.microservices.streakscheduleservice.dto.InitStreakResultDTO;
+import com.microservices.streakscheduleservice.utils.UtilsFn;
 import io.temporal.activity.ActivityOptions;
-import io.temporal.client.WorkflowOptions;
 import io.temporal.common.RetryOptions;
 import io.temporal.workflow.Workflow;
-import org.springframework.stereotype.Service;
-import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 
-@Service
+
 public class UserDailyNotiWfImpl implements UserDailyNotiWf {
+    // init logger
     private static ActivityOptions actOps() {
         return ActivityOptions.newBuilder()
                 .setStartToCloseTimeout(Duration.ofSeconds(60))
@@ -44,10 +44,10 @@ public class UserDailyNotiWfImpl implements UserDailyNotiWf {
     private String userId;
     private int offsetSec;
 
-    @Override
-    public void run(long uid, int offsetSec) {
-        runWithInit(uid, offsetSec, true, null, null);
-    }
+//    @Override
+//    public void run(long uid, int offsetSec) {
+//        runWithInit(uid, offsetSec, true, null, null);
+//    }
 
     @Override
     public void runWithInit(long uid, int offsetSec, boolean initDataAgain, String lastDateLearned, Long streakCount) {
@@ -60,41 +60,67 @@ public class UserDailyNotiWfImpl implements UserDailyNotiWf {
         }
 
         if (initDataAgain) {
-            if (lastStudyLocal == null) {
-                Tuple2<LocalDate, Long> init = initStub.init(uid);
-                if (!init.getT1().isEqual(LocalDate.MIN)) {
-                    lastStudyLocal = init.getT1();
-                    this.streakCount = init.getT2();
+            if (this.lastStudyLocal == null) {
+                System.out.println("Begin fetch data...");
+                InitStreakResultDTO init = initStub.init(uid);
+                if (!init.getDateLearned().isEqual(LocalDate.MIN)) {
+                    this.lastStudyLocal = init.getDateLearned();
+                    this.streakCount = init.getCurrentStreak();
                 }
+                System.out.println("End fetch data...");
             }
         }
 
         while (true) {
-            Instant fire = UtilsFn.nextXhXm(this.offsetSec, 21, 0);
-            Workflow.sleep(Duration.between(Instant.now(), fire));
+            System.out.println("Beginning loop...");
+            Instant now = Instant.ofEpochMilli(Workflow.currentTimeMillis());
+            Instant fire = UtilsFn.nextXhXm(now, this.offsetSec, 21, 0);
+            Workflow.sleep(Duration.between(now, fire));
+//            Instant tempNow = now.plusSeconds(65);
+//            // get hours and minutes
+//            int hours = tempNow.atOffset(ZoneOffset.ofTotalSeconds(this.offsetSec)).getHour();
+//            int minutes = tempNow.atOffset(ZoneOffset.ofTotalSeconds(this.offsetSec)).getMinute();
+//
+//            Instant fire = UtilsFn.nextXhXm(now, this.offsetSec, hours, minutes);
+//            Workflow.sleep(Duration.between(now, tempNow));
 
-            LocalDate today     = fire.atOffset(ZoneOffset.ofTotalSeconds(offsetSec)).toLocalDate();
+            Instant fired = Instant.ofEpochMilli(Workflow.currentTimeMillis());
+            LocalDate today = fired.atOffset(ZoneOffset.ofTotalSeconds(offsetSec)).toLocalDate();
             LocalDate yesterday = today.minusDays(1);
 
-            if (lastStudyLocal != null && lastStudyLocal.isBefore(today.minusDays(3))) {
+            if (this.lastStudyLocal != null && this.lastStudyLocal.isBefore(today.minusDays(3))) {
                 // Stop sending notifications
                 break;
             }
 
-            boolean send = yesterday.equals(lastStudyLocal) && !today.equals(lastStudyLocal);
+            boolean send = yesterday.equals(this.lastStudyLocal) && !today.equals(this.lastStudyLocal);
 
             if (send) {
-
+                StreakNotificationData sendNoti = UtilsFn.buildNotiMessage(
+                        userId,
+                        this.streakCount == null ? 0L : this.streakCount,
+                        this.lastStudyLocal
+                );
+                System.out.println("Sent notification data");
+                sender.sendStreakNotification(sendNoti);
             }
-
-            Workflow.sleep(Duration.ofMinutes(1));
+            StreakNotificationData sendNoti = UtilsFn.buildNotiMessage(
+                    userId,
+                    this.streakCount == null ? 0L : this.streakCount,
+                    this.lastStudyLocal == null ? LocalDate.now() : this.lastStudyLocal
+            );
+            System.out.println("Sent notification data");
+            System.out.println("Last study date: " + this.lastStudyLocal);
+            System.out.println("Streak count: " + this.streakCount);
+//            sender.sendStreakNotification(sendNoti);
+            System.out.println("Done task, next beginning loop...");
         }
     }
 
     @Override
-    public void markStudied(long uid, LocalDate newLocalDate, Long newStreakCount) {
-        lastStudyLocal = newLocalDate;
-        streakCount = newStreakCount;
+    public void markStudied(String uid, LocalDate newLocalDate, Long newStreakCount) {
+        this.lastStudyLocal = newLocalDate;
+        this.streakCount = newStreakCount;
     }
 
     @Override
@@ -110,9 +136,7 @@ public class UserDailyNotiWfImpl implements UserDailyNotiWf {
         String lastDateStr = lastStudyLocal != null
                 ? lastStudyLocal.toString()
                 : null;
-        Long currentStreak = streakCount != null
-                ? streakCount
-                : 0L;
+        Long currentStreak = streakCount;
 
         UserDailyNotiWf self = Workflow.newContinueAsNewStub(UserDailyNotiWf.class);
 

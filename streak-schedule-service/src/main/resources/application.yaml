@@ -1,8 +1,24 @@
+server:
+  port: 8111
+
+app:
+  workflow_id_prefix: push_noti_
+
 spring:
   application:
-    name: schedule-service
+    name: streak-schedule-service
   config:
     import: optional:file:.env[.properties]
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
+  r2dbc:
+    url: ${R2DBC_URL}
+    username: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
   temporal:

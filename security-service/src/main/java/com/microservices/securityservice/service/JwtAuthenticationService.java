@@ -4,6 +4,7 @@ import com.microservices.dto.security.UserInfo;
 import com.microservices.dto.security.UserPrincipal;
 import com.microservices.security.JwtTokenProvider;
 
+import com.microservices.securityservice.dto.TokenValidationResult;
 import com.microservices.securityservice.utils.TokenUtils;
 import com.microservices.utils.ReactiveRedisUtils;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -42,7 +43,7 @@ public class JwtAuthenticationService {
     @NonFinal
     String jwtSecret;
 
-    public Mono<UserInfo> validateAccessToken(String authorizationHeader) {
+    public Mono<TokenValidationResult> validateAccessToken(String authorizationHeader) {
         JwtTokenProvider tokenProvider = new JwtTokenProvider(jwtSecret);
         ReactiveRedisUtils redisUtils = new ReactiveRedisUtils(reactiveRedisTemplate);
         String token = TokenUtils.extractToken(authorizationHeader);
@@ -87,7 +88,8 @@ public class JwtAuthenticationService {
                                     if (!up.isEnabled()) {
                                         return Mono.error(new IllegalStateException("User disabled"));
                                     }
-                                    return Mono.just(UserInfo.from(up));
+                                    UserInfo info = UserInfo.from(up);
+                                    return Mono.just(new TokenValidationResult(info, jti));
                                 });
                     });
         } catch (ExpiredJwtException ex) {

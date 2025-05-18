@@ -1,4 +1,4 @@
-package com.microservices.notificationservice.security;
+package com.microservices.notificationservicefortesting.security;
 
 import com.microservices.dto.security.UserPrincipal;
 import lombok.AccessLevel;
@@ -54,6 +54,7 @@ public class ProfileFilter implements WebFilter, Ordered {
         String email = headers.getFirst("X-User-Email");
         String phone = headers.getFirst("X-User-PhoneNumber");
         String address = headers.getFirst("X-User-Address");
+        String userTz = headers.getFirst("X-User-UserTz");
 
         // Build danh sách authorities từ roles và permissions
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -82,6 +83,7 @@ public class ProfileFilter implements WebFilter, Ordered {
                 .phoneNumber(phone)
                 .address(address)
                 .gender(gender)
+                .userTz(userTz)
                 .isEnabled(enabled)
                 .authorities(authorities)
                 .build();

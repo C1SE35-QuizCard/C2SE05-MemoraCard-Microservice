@@ -1,4 +1,4 @@
-package com.microservices.scheduleservice.service;
+package com.microservices.streakscheduleservice.service;
 
 import com.microservices.dto.notification.StreakNotificationData;
 import io.temporal.activity.ActivityInterface;

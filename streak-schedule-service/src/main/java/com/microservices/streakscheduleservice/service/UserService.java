@@ -1,7 +1,7 @@
-package com.microservices.scheduleservice.service;
+package com.microservices.streakscheduleservice.service;
 
-import com.microservices.scheduleservice.dto.UserWithStreakAnalysisDTO;
-import com.microservices.scheduleservice.model.AppUser;
+import com.microservices.streakscheduleservice.dto.UserWithStreakAnalysisDTO;
+import com.microservices.streakscheduleservice.model.AppUser;
 import io.temporal.activity.ActivityInterface;
 import reactor.core.publisher.Flux;
 

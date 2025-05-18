@@ -1,11 +1,12 @@
 package com.microservices.trollingservice.config;
 
-import com.microservices.trollingservice.security.JwtAuthFilter;
+import com.microservices.ProfileFilter;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -20,7 +21,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @EnableReactiveMethodSecurity
 public class SecurityConfig {
-    JwtAuthFilter jwtAuthFilter;
+    ProfileFilter profileFilter;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -31,7 +32,7 @@ public class SecurityConfig {
 //                        .pathMatchers("/internal/**").permitAll()
                                 .anyExchange().permitAll()
                 )
-                .addFilterAt(jwtAuthFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterAt(profileFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable);
         return http.build();
