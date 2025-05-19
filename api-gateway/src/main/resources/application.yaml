@@ -49,6 +49,12 @@ spring:
               args:
                 prefix: /api/v1/ms
 
+        - id: quizcards_ws_auth
+          uri: lb://quizcards
+          predicates:
+            - Path=${app.api-prefix}/ws/**, ${app.api-prefix}/auth/**
+        #          filters:
+        #            - name: ReactiveAuthentication
 
         - id: notification_testing_service
           uri: lb://notification-service-for-testing
@@ -63,24 +69,10 @@ spring:
               args:
                 prefix: /api/v1/ms
 
-        - id: quizcards_ws_auth
-          uri: lb://quizcards
-          predicates:
-            - Path=${app.api-prefix}/ws/**, ${app.api-prefix}/auth/**
-          filters:
-            - name: ReactiveAuthentication
-
         - id: quizcards_general_service
           uri: lb://quizcards
           predicates:
             - Path=${app.api-prefix-v1}/**
-          filters:
-            - name: ReactiveAuthentication
-
-        - id: trolling_service
-          uri: lb://trolling-service
-          predicates:
-            - Path=${app.api-prefix-v1}/trolling/**
           filters:
             - name: ReactiveAuthentication
 

@@ -1,6 +1,8 @@
 package com.microservices.streakscheduleservice.config;
 
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +19,10 @@ import java.util.Map;
 public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
+    @Value("${spring.kafka.username:}")
+    private String username;
+    @Value("${spring.kafka.password:}")
+    private String password;
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
@@ -24,6 +30,17 @@ public class KafkaProducerConfig {
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        if (!username.isBlank() && !password.isBlank()) {
+            configProps.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
+            configProps.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
+            String jaas = String.format(
+                    "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";",
+                    username, password
+            );
+            configProps.put(SaslConfigs.SASL_JAAS_CONFIG, jaas);
+        }
+
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 

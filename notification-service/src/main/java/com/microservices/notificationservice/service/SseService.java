@@ -242,12 +242,12 @@ public class SseService {
                         saga,
                         ACK_TIMEOUT.toSeconds() * 4,
                         TimeUnit.SECONDS))
-                .then(autoAck ? redisUtils.saveToRedis(
-                        "saga:" + sagaId + ":ack",
-                        true,
-                        1,
-                        TimeUnit.HOURS) : Mono.empty()
-                )
+//                .then(autoAck ? redisUtils.saveToRedis(
+//                        "saga:" + sagaId + ":ack",
+//                        true,
+//                        1,
+//                        TimeUnit.HOURS) : Mono.empty()
+//                )
                 .then(redis.opsForZSet()
                         .add("saga:pending", sagaId, (double) expire))
                 .then(redisUtils.saveToRedis(

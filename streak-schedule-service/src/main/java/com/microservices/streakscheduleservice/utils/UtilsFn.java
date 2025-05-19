@@ -1,19 +1,12 @@
 package com.microservices.streakscheduleservice.utils;
 
 import com.microservices.dto.notification.StreakNotificationData;
-import org.springframework.data.domain.Range;
-import org.springframework.data.redis.connection.Limit;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -46,36 +39,6 @@ public class UtilsFn {
         return dUtc.atStartOfDay(ZoneOffset.UTC)
                 .withZoneSameInstant(ZoneOffset.ofTotalSeconds(off))
                 .toLocalDate();
-    }
-
-    public static Mono<List<Object>> popShard(
-            ReactiveRedisTemplate<String, Object> redis,
-            int offsetSec,
-            int shard,
-            int total,
-            int size,
-            String key) {
-        int start = shard * size;
-        Range<Double> exact = Range.closed((double) offsetSec, (double) offsetSec);
-
-        return redis.opsForZSet().rangeByScore(key, exact,
-                        org.springframework.data.redis.connection.RedisZSetCommands.Limit.limit().offset(start).count(size))
-                .collectList()
-                .flatMap(ids -> {
-                    if (ids.isEmpty()) {
-                        return Mono.just(ids);
-                    } else {
-                        return redis.opsForZSet().remove(key, ids.toArray())
-                                .thenReturn(ids);
-                    }
-                });
-    }
-
-    public static Mono<Boolean> addBack(ReactiveRedisTemplate<String, Object> redis,
-                          long userId,
-                          int offsetSec,
-                          String key) {
-        return redis.opsForZSet().add(key, userId, offsetSec);
     }
 
     private static final List<String> MESSAGE_TEMPLATES = List.of(

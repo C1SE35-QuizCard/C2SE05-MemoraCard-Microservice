@@ -149,46 +149,46 @@
 version: '3.8'
 
 services:
-  redis:
-    image: bitnami/redis:7.2
-    container_name: redis
-    networks:
-      - microservices-network
-    environment:
-      - ALLOW_EMPTY_PASSWORD=no
-      - REDIS_PASSWORD=${REDIS_PASSWORD:123456}
-    ports:
-      - "6379:6379"
-    restart: unless-stopped
-
-  kafka:
-    image: bitnami/kafka:3.8
-    container_name: kafka
-    networks:
-      - microservices-network
-    environment:
-      - KAFKA_HEAP_OPTS=-Xms1G -Xmx1G
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_PROCESS_ROLES=broker,controller
-      - KAFKA_NODE_ID=1
-      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9094
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,SASL_PLAINTEXT://0.0.0.0:9093,CONTROLLER://0.0.0.0:9094
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://${KAFKA_IP_SERVER}:9092,SASL_PLAINTEXT://${KAFKA_IP_SERVER}:9093
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT
-      - KAFKA_BROKER_USER=${KAFKA_BROKER_USER:}
-      - KAFKA_BROKER_PASSWORD=${KAFKA_BROKER_PASSWORD:}
-      - KAFKA_INTER_BROKER_USER=${KAFKA_INTER_BROKER_USER:broker}
-      - KAFKA_INTER_BROKER_PASSWORD=${KAFKA_INTER_BROKER_PASSWORD:}
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=SASL_PLAINTEXT
-      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
-    ports:
-      - "9092:9092"
-      - "9093:9093"
-    volumes:
-      #      - ./kafka_data:/bitnami/kafka
-      - kafka_data:/bitnami/kafka
-    restart: unless-stopped
+#  redis:
+#    image: bitnami/redis:7.2
+#    container_name: redis
+#    networks:
+#      - microservices-network
+#    environment:
+#      - ALLOW_EMPTY_PASSWORD=no
+#      - REDIS_PASSWORD=${REDIS_PASSWORD:123456}
+#    ports:
+#      - "6379:6379"
+#    restart: unless-stopped
+#
+#  kafka:
+#    image: bitnami/kafka:3.8
+#    container_name: kafka
+#    networks:
+#      - microservices-network
+#    environment:
+#      - KAFKA_HEAP_OPTS=-Xms1G -Xmx1G
+#      - ALLOW_PLAINTEXT_LISTENER=yes
+#      - KAFKA_PROCESS_ROLES=broker,controller
+#      - KAFKA_NODE_ID=1
+#      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9094
+#      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,SASL_PLAINTEXT://0.0.0.0:9093,CONTROLLER://0.0.0.0:9094
+#      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://${KAFKA_IP_SERVER}:9092,SASL_PLAINTEXT://${KAFKA_IP_SERVER}:9093
+#      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT
+#      - KAFKA_BROKER_USER=${KAFKA_BROKER_USER:}
+#      - KAFKA_BROKER_PASSWORD=${KAFKA_BROKER_PASSWORD:}
+#      - KAFKA_INTER_BROKER_USER=${KAFKA_INTER_BROKER_USER:broker}
+#      - KAFKA_INTER_BROKER_PASSWORD=${KAFKA_INTER_BROKER_PASSWORD:}
+#      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+#      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=SASL_PLAINTEXT
+#      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
+#    ports:
+#      - "9092:9092"
+#      - "9093:9093"
+#    volumes:
+#      #      - ./kafka_data:/bitnami/kafka
+#      - kafka_data:/bitnami/kafka
+#    restart: unless-stopped
 
   elasticsearch:
     container_name: temporal-elasticsearch
@@ -282,8 +282,8 @@ services:
     ports:
       - "8099:8099"
 
-volumes:
-  kafka_data:
+#volumes:
+#  kafka_data:
 #  dynamicconfig:
 
 networks:

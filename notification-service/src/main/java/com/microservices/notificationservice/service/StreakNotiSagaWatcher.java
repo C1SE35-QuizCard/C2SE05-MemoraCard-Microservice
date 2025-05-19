@@ -46,14 +46,15 @@ public class StreakNotiSagaWatcher {
      * Xử lý 1 sagaId – có/không ack
      */
     private Mono<Void> handle(String sagaId) {
+//        return redis.opsForValue()
+//                .get("saga:" + sagaId + ":ack")
+////                .get("saga:" + sagaId)
+//                .hasElement()                              // Mono<Boolean>
+//                .flatMap(hasAck ->
+//                        hasAck ? cleanup(sagaId, true)
+//                                : retryOrDrop(sagaId));
 
-        return redis.opsForValue()
-                .get("saga:" + sagaId + ":ack")
-//                .get("saga:" + sagaId)
-                .hasElement()                              // Mono<Boolean>
-                .flatMap(hasAck ->
-                        hasAck ? cleanup(sagaId, true)
-                                : retryOrDrop(sagaId));
+        return cleanup(sagaId, true); // xóa luôn
     }
 
     /**
@@ -64,7 +65,6 @@ public class StreakNotiSagaWatcher {
                 .get("saga:" + sagaId)                    // lấy bản ghi saga
                 .cast(NotificationSagaRecord.class)
                 .flatMap(saga -> {
-
                     if (saga.getAttempt() >= 3) {
                         log.warn("Saga {} drop after {} times retry",
                                 sagaId, saga.getAttempt());
@@ -102,8 +102,8 @@ public class StreakNotiSagaWatcher {
 
                     return redis.opsForZSet().remove("saga:pending", sagaId)
                             .then(redis.delete("saga:" + sagaId))
-                            .then(redis.delete("saga:" + sagaId + ":ack"))
-//                            .then(sendAck)               // bắn sự kiện nếu cần
+//                            .then(redis.delete("saga:" + sagaId + ":ack"))
+////                            .then(sendAck)               // bắn sự kiện nếu cần
                             .then(redis.delete(dataKey)) // xóa data_streak
                             .doOnSuccess(v ->
                                     log.info("Saga {} cleanup done", sagaId)

@@ -29,3 +29,6 @@ MODIFY COLUMN `enabled` tinyint(1) DEFAULT TRUE;
 
 ALTER TABLE `app_users`
     MODIFY COLUMN `gender` tinyint(1) DEFAULT TRUE;
+
+-- ALTER TABLE `app_users`
+--     ADD COLUMN `test_col` varchar(2);

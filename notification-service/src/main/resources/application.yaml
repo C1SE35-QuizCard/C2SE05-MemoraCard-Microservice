@@ -12,6 +12,8 @@ spring:
     import: optional:file:.env[.properties]
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    username: ${KAFKA_USERNAME:}
+    password: ${KAFKA_PASSWORD:}
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration

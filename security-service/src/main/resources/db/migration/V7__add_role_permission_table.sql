@@ -1,4 +1,4 @@
-create table app_roles_permissions
+CREATE TABLE IF NOT EXISTS app_roles_permissions
 (
     role_permission_id bigint auto_increment primary key,
     role_id            bigint,

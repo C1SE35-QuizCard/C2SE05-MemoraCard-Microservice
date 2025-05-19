@@ -21,6 +21,8 @@ spring:
     password: ${DBMS_PASSWORD}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    username: ${KAFKA_USERNAME:}
+    password: ${KAFKA_PASSWORD:}
   temporal:
     namespace: ${TEMPORAL_NAMESPACE:default}
 
