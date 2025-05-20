@@ -22,10 +22,12 @@ spring:
     gateway:
       globalcors:
         corsConfigurations:
-          '[/**]':
+          '[/api/v1/**]':
             allowedOrigins:
-              - "http://localhost:3000"
-              - "https://localhost:3000"
+              - http://localhost:3000
+              - http://localhost:5173
+              - https://localhost:3000
+              - https://localhost:5173
             allowedMethods:
               - GET
               - POST
@@ -35,7 +37,46 @@ spring:
               - PATCH
             allowedHeaders: "*"
             allowCredentials: true
+          '[/api/auth/**]':
+            allowedOrigins:
+              - http://localhost:3000
+              - http://localhost:5173
+              - https://localhost:3000
+              - https://localhost:5173
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allowCredentials: true
+          '[/api/insights/**]':
+            allowedOrigins:
+              - http://localhost:3000
+              - http://localhost:5173
+              - https://localhost:3000
+              - https://localhost:5173
+            allowedMethods:
+              - GET
+              - POST
+            allowed-headers: "*"
+            allowCredentials: true
       routes:
+        - id: ws_sock_info_route
+          uri: lb://quizcards
+          predicates:
+            - Path=${app.api-prefix}/ws/info/**
+          filters:
+            - name: ReactiveAuthentication
+
+        - id: ws_sock_route
+          uri: lb://quizcards
+          predicates:
+            - Path=${app.api-prefix}/ws/**
+          filters:
+            - name: ReactiveAuthentication
+
         - id: notification_service
           uri: lb://notification-service
           predicates:
@@ -49,10 +90,17 @@ spring:
               args:
                 prefix: /api/v1/ms
 
-        - id: quizcards_ws_auth
+        - id: quizcards_auth
           uri: lb://quizcards
           predicates:
-            - Path=${app.api-prefix}/ws/**, ${app.api-prefix}/auth/**
+            - Path=${app.api-prefix}/auth/**
+          filters:
+            - name: ReactiveAuthentication
+
+        #        - id: quizcards_ws_auth
+        #          uri: lb://quizcards
+        #          predicates:
+        #            - Path=${app.api-prefix}/ws/**, ${app.api-prefix}/auth/**
         #          filters:
         #            - name: ReactiveAuthentication
 
@@ -102,3 +150,10 @@ eureka:
 
 services:
   security_service_url: "http://security-service/${app.api-insights}/security"
+
+logging:
+  level:
+    org.springframework.web.cors: TRACE
+    org.springframework.cloud.gateway.filter.cors: TRACE
+    org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping: TRACE
+    org.springframework.cloud.gateway: TRACE

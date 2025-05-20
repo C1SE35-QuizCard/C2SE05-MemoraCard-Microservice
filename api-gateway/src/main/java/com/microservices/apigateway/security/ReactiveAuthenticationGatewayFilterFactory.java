@@ -16,9 +16,11 @@ import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFac
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.server.ServerWebExchange;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -88,7 +90,7 @@ public class ReactiveAuthenticationGatewayFilterFactory
                         UserInfo userInfo = resp.getBody();
                         HttpStatus status = (HttpStatus) resp.getStatusCode();
 
-                        System.out.println("X-Token-ID: " + resp.getHeaders().get("X-Token-ID"));
+//                        System.out.println("X-Token-ID: " + resp.getHeaders().get("X-Token-ID"));
 
                         if (Objects.requireNonNull(resp.getHeaders().get("X-Token-ID")).isEmpty() ||
                                 Objects.requireNonNull(resp.getHeaders().get("X-Token-ID")).getFirst().isBlank()) {
