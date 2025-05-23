@@ -21,6 +21,7 @@ import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Configuration
 public class KafkaConsumerConfig {
@@ -30,6 +31,8 @@ public class KafkaConsumerConfig {
     private String username;
     @Value("${spring.kafka.password:}")
     private String password;
+    @Value("${spring.kafka.port}")
+    private String port;
 
     @Bean
     public ConsumerFactory<String, Object> consumerFactory() {
@@ -44,7 +47,7 @@ public class KafkaConsumerConfig {
         configProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 //        configProps.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
 
-        if (!username.isBlank() && !password.isBlank()) {
+        if (!Objects.equals(port, "9092") && !username.isBlank() && !password.isBlank()) {
             configProps.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
             configProps.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
             String jaas = String.format(

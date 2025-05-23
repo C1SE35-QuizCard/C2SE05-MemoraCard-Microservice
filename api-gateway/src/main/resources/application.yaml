@@ -37,6 +37,21 @@ spring:
               - PATCH
             allowedHeaders: "*"
             allowCredentials: true
+          '[/api/v2/**]':
+            allowedOrigins:
+              - http://localhost:3000
+              - http://localhost:5173
+              - https://localhost:3000
+              - https://localhost:5173
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
           '[/api/auth/**]':
             allowedOrigins:
               - http://localhost:3000
@@ -121,6 +136,13 @@ spring:
           uri: lb://quizcards
           predicates:
             - Path=${app.api-prefix-v1}/**
+          filters:
+            - name: ReactiveAuthentication
+
+        - id: quizcards_general_service_v2
+          uri: lb://quizcards
+          predicates:
+            - Path=${app.api-prefix-v2}/**
           filters:
             - name: ReactiveAuthentication
 

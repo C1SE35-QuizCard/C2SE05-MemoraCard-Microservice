@@ -70,11 +70,14 @@ public class ReactiveAuthenticationGatewayFilterFactory
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             log.info("Enter authentication filter 2 ....");
+            long startTime = System.currentTimeMillis();
 
             ServerHttpRequest request = exchange.getRequest();
 
             // Bỏ qua public endpoints
             if (!isAuthEndpoint(exchange.getRequest())) {
+                long endTime = System.currentTimeMillis();
+                System.out.println("Authentication filter bypassed: " + (endTime - startTime) + "ms");
                 return chain.filter(exchange);
             }
 
@@ -128,6 +131,8 @@ public class ReactiveAuthenticationGatewayFilterFactory
                         ServerHttpRequest mutated = mutateRequestWithHeaders(request, userInfo,
                                 Objects.requireNonNull(resp.getHeaders().get("X-Token-ID")).getFirst());
 
+                        long endTime = System.currentTimeMillis();
+                        System.out.println("Authentication filter bypassed: " + (endTime - startTime) + "ms");
                         return chain.filter(exchange.mutate().request(mutated).build());
                     })
                     .onErrorResume(WebClientResponseException.class, ex -> {

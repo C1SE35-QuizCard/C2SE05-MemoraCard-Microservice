@@ -20,7 +20,8 @@ spring:
     username: ${DBMS_USERNAME}
     password: ${DBMS_PASSWORD}
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    port: ${KAFKA_PORT:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:${spring.kafka.port}}
     username: ${KAFKA_USERNAME:}
     password: ${KAFKA_PASSWORD:}
   temporal:

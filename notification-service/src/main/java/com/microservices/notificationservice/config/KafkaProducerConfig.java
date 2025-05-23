@@ -14,6 +14,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Configuration
 public class KafkaProducerConfig {
@@ -23,6 +24,8 @@ public class KafkaProducerConfig {
     private String username;
     @Value("${spring.kafka.password:}")
     private String password;
+    @Value("${spring.kafka.port}")
+    private String port;
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
@@ -31,7 +34,7 @@ public class KafkaProducerConfig {
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
-        if (!username.isBlank() && !password.isBlank()) {
+        if (!Objects.equals(port, "9092") && !username.isBlank() && !password.isBlank()) {
             // bật SASL nếu có credentials
             configProps.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
             configProps.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
