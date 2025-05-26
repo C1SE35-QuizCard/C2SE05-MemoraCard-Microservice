@@ -1,9 +1,9 @@
 package com.microservices.securityservice.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.microservices.dto.security.UserInfo;
 import com.microservices.dto.security.UserPrincipal;
 import com.microservices.security.JwtTokenProvider;
-
 import com.microservices.securityservice.dto.TokenValidationResult;
 import com.microservices.securityservice.utils.TokenUtils;
 import com.microservices.utils.ReactiveRedisUtils;
@@ -15,11 +15,13 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.text.MessageFormat;
+import java.time.Instant;
 import java.util.Map;
 
 @Service
@@ -43,9 +45,26 @@ public class JwtAuthenticationService {
     @NonFinal
     String jwtSecret;
 
+    ReactiveRedisUtils redisUtils;
+
+    CacheManager cacheManager;
+
+    private Cache<Object, Object> blacklistCache() {
+        @SuppressWarnings("unchecked")
+        Cache<Object, Object> cache = (Cache<Object, Object>)
+                cacheManager.getCache("token_blacklist").getNativeCache();
+        return cache;
+    }
+
+    private Cache<Object, Object> iatCache() {
+        @SuppressWarnings("unchecked")
+        Cache<Object, Object> cache = (Cache<Object, Object>)
+                cacheManager.getCache("token_iat").getNativeCache();
+        return cache;
+    }
+
     public Mono<TokenValidationResult> validateAccessToken(String authorizationHeader) {
         JwtTokenProvider tokenProvider = new JwtTokenProvider(jwtSecret);
-        ReactiveRedisUtils redisUtils = new ReactiveRedisUtils(reactiveRedisTemplate);
         String token = TokenUtils.extractToken(authorizationHeader);
         if (token == null) {
             return Mono.error(new IllegalArgumentException("Missing or malformed Authorization header"));
@@ -66,10 +85,49 @@ public class JwtAuthenticationService {
             String blacklistKey = MessageFormat.format("{0}_{1}_{2}", tokenBlacklistPrefix, userId, jti);
             String iatKey = MessageFormat.format("{0}_{1}", tokenIatPrefix, userId);
 
-            Mono<Boolean> isBlacklistedMono = redisUtils.getFromRedis(blacklistKey, Boolean.class).defaultIfEmpty(false);
-            Mono<Long> lastLogoutAllTsMono = redisUtils.getFromRedis(iatKey, Long.class).defaultIfEmpty(0L);
+//            Mono<Boolean> isBlacklistedMono = redisUtils.getFromRedis(blacklistKey, Boolean.class).defaultIfEmpty(false);
+//            Mono<Long> lastLogoutAllTsMono = redisUtils.getFromRedis(iatKey, Long.class).defaultIfEmpty(0L);
 
-            return Mono.zip(isBlacklistedMono, lastLogoutAllTsMono)
+            Mono<Boolean> isBlacklistedMono = Mono.defer(() -> {
+                // 1. Thử lấy từ local cache
+                Boolean cached = (Boolean) blacklistCache().getIfPresent(blacklistKey);
+                if (cached != null) {
+                    return Mono.just(cached);
+                }
+                // 2. Nếu miss → check Redis, map result thành true/false, update local cache
+                return redisUtils.getFromRedis(blacklistKey, Instant.class)
+                        .map(v -> true)                // nếu có giá trị Instant → blacklisted = true
+                        .defaultIfEmpty(false)         // nếu empty → blacklisted = false
+                        .doOnNext(flag ->              // lưu vào cache
+                                blacklistCache().put(blacklistKey, flag)
+                        );
+            });
+
+            Mono<Long> lastLogoutTsMono = Mono.defer(() -> {
+                Long cached = (Long) iatCache().getIfPresent(iatKey);
+                if (cached != null) {
+                    return Mono.just(cached);
+                }
+                return redisUtils.getFromRedis(iatKey, Object.class)
+                        .map(rawIat -> {
+                            if (rawIat == null) {
+                                return Long.MIN_VALUE + 1;
+                            } else if (rawIat instanceof Instant) {
+                                return ((Instant) rawIat).toEpochMilli();
+                            } else {
+                                try {
+                                    return Long.parseLong(rawIat.toString());
+                                } catch (NumberFormatException e) {
+                                    log.error("Failed to parse iat value for key {}: {}", iatKey, rawIat, e);
+                                    return Long.MIN_VALUE + 1;
+                                }
+                            }
+                        })
+                        .defaultIfEmpty(Long.MIN_VALUE + 1L)
+                        .doOnNext(v -> iatCache().put(iatKey, v));
+            });
+
+            return Mono.zip(isBlacklistedMono, lastLogoutTsMono)
                     .flatMap(tuple -> {
                         boolean isBlacklisted = tuple.getT1();
                         long lastLogoutAllTs = tuple.getT2();

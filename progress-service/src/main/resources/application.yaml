@@ -1,0 +1,52 @@
+server:
+  port: 8090
+
+app:
+  set-progress-setting-base-url: "http://set-progress-setting-service/${API_PREFIX_V1}/ms/setting-progress"
+
+spring:
+  webflux:
+    base-path: ${API_PREFIX_V1}/ms/progress/user
+  application:
+    name: progress-service
+  config:
+    import: optional:file:.env[.properties]
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
+  r2dbc:
+    url: ${R2DBC_URL}
+    username: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    url: ${DBMS_URL}
+    user: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
+    baseline-on-migrate: true
+    validate-on-migrate: false
+  data:
+    redis:
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      connect-timeout: ${REDIS_CONNECT_TIMEOUT}
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_ZONE_HTTP_METHOD:http}://${eureka.instance.hostname}:${EUREKA_SERVER_PORT}/eureka/
+    #      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true # Gửi IP thay vì hostname cho Eureka
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}

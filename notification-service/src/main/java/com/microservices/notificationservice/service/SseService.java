@@ -51,6 +51,9 @@ public class SseService {
 
     ConnectionGuard guard;
 
+    ReactiveRedisUtils redisUtils;
+
+
 //    @NonFinal
 //    ReactiveRedisUtils redisUtils;
 //
@@ -167,7 +170,6 @@ public class SseService {
 
 
     public Mono<Void> ack(String sagaId) {
-        ReactiveRedisUtils redisUtils = new ReactiveRedisUtils(redis);
         return redisUtils.saveToRedis("saga:" + sagaId + ":ack",
                 true, 1, TimeUnit.HOURS);
     }

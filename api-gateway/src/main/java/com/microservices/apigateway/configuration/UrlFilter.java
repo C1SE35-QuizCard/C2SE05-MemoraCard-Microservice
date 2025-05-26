@@ -51,6 +51,12 @@ public class UrlFilter {
     public static String[] authEndpoints = {
             "/notification/**",
             "/notification-testing/**",
+//            "/streak-learning/**",
+            "/setting-progress/**",
+            "/progress/user/**",
+            "/videos/**",
+            "/trolling/**",
+            "/streak-learning/**",
     };
 
     public static String[] publicEndpoints = new String[]

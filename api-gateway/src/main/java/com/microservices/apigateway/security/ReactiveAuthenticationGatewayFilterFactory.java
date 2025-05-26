@@ -36,6 +36,10 @@ public class ReactiveAuthenticationGatewayFilterFactory
     @NonFinal
     String apiPrefixV1;
 
+    @Value("${app.api-prefix-v2}")
+    @NonFinal
+    String apiPrefixV2;
+
     public static class Config {
         // nếu cần thêm property, khai báo ở đây
     }
@@ -58,7 +62,8 @@ public class ReactiveAuthenticationGatewayFilterFactory
 
     private boolean isAuthEndpoint(ServerHttpRequest request) {
         return Arrays.stream(authEndpointsRegex)
-                .anyMatch(s -> request.getURI().getPath().matches(apiPrefixV1 + s));
+                .anyMatch(s -> request.getURI().getPath().matches(apiPrefixV1 + s)
+                 || request.getURI().getPath().matches(apiPrefixV2 + s));
     }
 
     @Override
@@ -81,11 +86,18 @@ public class ReactiveAuthenticationGatewayFilterFactory
                 return chain.filter(exchange);
             }
 
+            System.out.println("Authentication filter processing request: " + request.getURI());
+
             // Lấy JWT
             String bearer = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
             if (!StringUtils.hasText(bearer) || !bearer.startsWith("Bearer ")) {
-                return chain.filter(exchange);
+//                return chain.filter(exchange);
+                return ErrorHandler.handleAuthenticationError(
+                        exchange.getResponse(),
+                        "Token ID not found",
+                        HttpStatus.UNAUTHORIZED
+                );
             }
 
             return securityClient.validateToken(bearer)
@@ -93,7 +105,10 @@ public class ReactiveAuthenticationGatewayFilterFactory
                         UserInfo userInfo = resp.getBody();
                         HttpStatus status = (HttpStatus) resp.getStatusCode();
 
+                        System.out.println("URI After filter: " + request.getURI());
 //                        System.out.println("X-Token-ID: " + resp.getHeaders().get("X-Token-ID"));
+                        System.out.println("X-Token-ID: " +
+                                Objects.requireNonNull(resp.getHeaders().get("X-Token-ID")).getFirst());
 
                         if (Objects.requireNonNull(resp.getHeaders().get("X-Token-ID")).isEmpty() ||
                                 Objects.requireNonNull(resp.getHeaders().get("X-Token-ID")).getFirst().isBlank()) {

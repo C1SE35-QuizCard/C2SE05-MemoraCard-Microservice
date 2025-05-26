@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `user_progress` (
+                                 `progress_id` bigint NOT NULL AUTO_INCREMENT,
+                                 `consecutive_correct_simple_mode` int NOT NULL,
+                                 `count_consecutive_hard_press` int NOT NULL,
+                                 `marked_for_attention` bit(1) DEFAULT NULL,
+    `mode_version` bigint NOT NULL,
+    `progress_type` bit(1) DEFAULT NULL,
+    `updated_at` datetime(6) NOT NULL,
+    `user_id` bigint NOT NULL,
+    `card_id` bigint NOT NULL,
+    PRIMARY KEY (`progress_id`),
+    UNIQUE KEY `idx_user_card` (`user_id`,`card_id`),
+    KEY `idx_user` (`user_id`),
+    KEY `idx_user_version_card` (`user_id`,`card_id`,`mode_version`),
+    KEY `idx_user_card_version_pt` (`user_id`,`card_id`,`mode_version`,`progress_type`),
+    KEY `FKfrqvpio4amwkfgljyft66f0de_cascade` (`card_id`),
+    CONSTRAINT `FKfrqvpio4amwkfgljyft66f0de_cascade` FOREIGN KEY (`card_id`) REFERENCES `flashcards` (`card_id`) ON DELETE CASCADE,
+    CONSTRAINT `FKkoh2qs073n3kto2fj7owpm6yb_cascade` FOREIGN KEY (`user_id`) REFERENCES `app_users` (`user_id`) ON DELETE CASCADE,
+    CONSTRAINT `user_progress_chk_1` CHECK (((`consecutive_correct_simple_mode` <= 3) and (`consecutive_correct_simple_mode` >= 0)))
+    ) ENGINE=InnoDB AUTO_INCREMENT=149 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

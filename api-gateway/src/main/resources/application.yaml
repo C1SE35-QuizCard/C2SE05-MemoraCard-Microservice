@@ -66,6 +66,20 @@ spring:
               - OPTIONS
             allowed-headers: "*"
             allowCredentials: true
+          '[/api/payment/**]':
+            allowedOrigins:
+              - http://localhost:3000
+              - http://localhost:5173
+              - https://localhost:3000
+              - https://localhost:5173
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allowCredentials: true
           '[/api/insights/**]':
             allowedOrigins:
               - http://localhost:3000
@@ -105,10 +119,95 @@ spring:
               args:
                 prefix: /api/v1/ms
 
+        - id: streak-service-v1
+          uri: lb://streak-learning-service
+          predicates:
+            - Path=${app.api-prefix-v1}/streak-learning/**
+          filters:
+            - name: ReactiveAuthentication
+            - name: StripPrefix
+              args:
+                parts: 2
+            - name: PrefixPath
+              args:
+                prefix: /api/v1/ms
+
+        - id: streak-service-v2
+          uri: lb://streak-learning-service
+          predicates:
+            - Path=${app.api-prefix-v2}/streak-learning/**
+          filters:
+            - name: ReactiveAuthentication
+            - name: StripPrefix
+              args:
+                parts: 2
+            - name: PrefixPath
+              args:
+                prefix: /api/v2/ms
+
+        - id: progress-service
+          uri: lb://progress-service
+          predicates:
+              - Path=${app.api-prefix-v1}/progress/user/**
+          filters:
+            - name: ReactiveAuthentication
+            - name: StripPrefix
+              args:
+                  parts: 2
+            - name: PrefixPath
+              args:
+                  prefix: /api/v1/ms
+
+        - id: set-progress-setting-service
+          uri: lb://set-progress-setting-service
+          predicates:
+              - Path=${app.api-prefix-v1}/setting-progress/**
+          filters:
+            - name: ReactiveAuthentication
+            - name: StripPrefix
+              args:
+                  parts: 2
+            - name: PrefixPath
+              args:
+                  prefix: /api/v1/ms
+
+        - id: video-service
+          uri: lb://video-service
+          predicates:
+            - Path=${app.api-prefix-v1}/videos/**
+          filters:
+            - name: ReactiveAuthentication
+            - name: StripPrefix
+              args:
+                parts: 2
+            - name: PrefixPath
+              args:
+                prefix: /api/v1/ms
+
+        - id: trolling-service
+          uri: lb://trolling-service
+          predicates:
+            - Path=${app.api-prefix-v1}/trolling/**
+          filters:
+            - name: ReactiveAuthentication
+            - name: StripPrefix
+              args:
+                parts: 2
+            - name: PrefixPath
+              args:
+                prefix: /api/v1/ms
+
         - id: quizcards_auth
           uri: lb://quizcards
           predicates:
             - Path=${app.api-prefix}/auth/**
+          filters:
+            - name: ReactiveAuthentication
+
+        - id: quizcards_payment
+          uri: lb://quizcards
+          predicates:
+            - Path=${app.api-prefix}/payment/**
           filters:
             - name: ReactiveAuthentication
 

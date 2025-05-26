@@ -3,6 +3,7 @@ package com.microservices.apigateway.exception;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -17,6 +18,8 @@ public class ErrorHandler {
     public static Mono<Void> handleAuthenticationError(ServerHttpResponse response, String message, HttpStatus status) {
         response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        response.getHeaders().set(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "X-Validate-Again");
+        response.getHeaders().set("X-Validate-Again", "true");
         try {
             byte[] body = objectMapper.writeValueAsBytes(Collections.singletonMap("error", message));
             DataBuffer buffer = response.bufferFactory().wrap(body);

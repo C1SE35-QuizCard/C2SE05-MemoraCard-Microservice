@@ -4,12 +4,14 @@ import com.microservices.dto.security.IAppUserInfo;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -72,8 +74,18 @@ public class AppUser implements Serializable, IAppUserInfo {
     @Column("user_tz")
     private String userTz;
 
+    @Transient
+    private List<String> roles = new ArrayList<>();
+
+    @Transient
+    private List<String> permissions = new ArrayList<>();
+
     @Override
     public String getUserName() {
+        return username;
+    }
+
+    public String getUsername() {
         return username;
     }
 
@@ -94,11 +106,11 @@ public class AppUser implements Serializable, IAppUserInfo {
 
     @Override
     public List<String> getRoles() {
-        return List.of();
+        return roles;
     }
 
     @Override
     public List<String> getPermissions() {
-        return List.of();
+        return permissions;
     }
 }
