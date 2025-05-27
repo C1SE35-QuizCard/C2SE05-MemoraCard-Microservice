@@ -149,17 +149,17 @@
 version: '3.8'
 
 services:
-  redis:
-    image: bitnami/redis:7.2
-    container_name: redis
-    networks:
-      - microservices-network
-    environment:
-      - ALLOW_EMPTY_PASSWORD=no
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-    ports:
-      - "6379:6379"
-    restart: unless-stopped
+#  redis:
+#    image: bitnami/redis:7.2
+#    container_name: redis
+#    networks:
+#      - microservices-network
+#    environment:
+#      - ALLOW_EMPTY_PASSWORD=no
+#      - REDIS_PASSWORD=${REDIS_PASSWORD}
+#    ports:
+#      - "6379:6379"
+#    restart: unless-stopped
 
   kafka:
     image: bitnami/kafka:3.8
@@ -282,101 +282,101 @@ services:
     ports:
       - "8099:8099"
 
-  mongodb-primary:
-    image: docker.io/bitnami/mongodb:latest
-    container_name: mongodb-primary
-    environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
-      - MONGODB_REPLICA_SET_MODE=primary
-      - MONGODB_ROOT_USER=admin
-      - MONGODB_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    volumes:
-      - mongodb_master_data:/bitnami/mongodb
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 2G
-    ports:
-      - "27017:27017"
-    networks:
-      - microservices-network
-
-  mongodb-secondary-1:
-    image: docker.io/bitnami/mongodb:latest
-    container_name: mongodb-secondary-1
-    depends_on:
-      - mongodb-primary
-    environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary-1
-      - MONGODB_REPLICA_SET_MODE=secondary
-      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
-      - MONGODB_INITIAL_PRIMARY_ROOT_USER=admin
-      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    volumes:
-      - mongodb_secondary_data_1:/bitnami/mongodb
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 2G
-    ports:
-      - "27018:27017"
-    networks:
-      - microservices-network
-
-  mongodb-secondary-2:
-    image: docker.io/bitnami/mongodb:latest
-    container_name: mongodb-secondary-2
-    depends_on:
-      - mongodb-primary
-    environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary-2
-      - MONGODB_REPLICA_SET_MODE=secondary
-      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
-      - MONGODB_INITIAL_PRIMARY_ROOT_USER=admin
-      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    volumes:
-      - mongodb_secondary_data_2:/bitnami/mongodb
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 2G
-    ports:
-      - "27019:27017"
-    networks:
-      - microservices-network
-
-  mongodb-secondary-3:
-    image: docker.io/bitnami/mongodb:latest
-    container_name: mongodb-secondary-3
-    depends_on:
-      - mongodb-primary
-    environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary-3
-      - MONGODB_REPLICA_SET_MODE=secondary
-      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
-      - MONGODB_INITIAL_PRIMARY_ROOT_USER=admin
-      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    volumes:
-      - mongodb_secondary_data_3:/bitnami/mongodb
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 2G
-    ports:
-      - "27020:27017"
-    networks:
-      - microservices-network
+#  mongodb-primary:
+#    image: docker.io/bitnami/mongodb:latest
+#    container_name: mongodb-primary
+#    environment:
+#      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
+#      - MONGODB_REPLICA_SET_MODE=primary
+#      - MONGODB_ROOT_USER=admin
+#      - MONGODB_ROOT_PASSWORD=password123
+#      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+#    volumes:
+#      - mongodb_master_data:/bitnami/mongodb
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '1.0'
+#          memory: 2G
+#    ports:
+#      - "27017:27017"
+#    networks:
+#      - microservices-network
+#
+#  mongodb-secondary-1:
+#    image: docker.io/bitnami/mongodb:latest
+#    container_name: mongodb-secondary-1
+#    depends_on:
+#      - mongodb-primary
+#    environment:
+#      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary-1
+#      - MONGODB_REPLICA_SET_MODE=secondary
+#      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+#      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+#      - MONGODB_INITIAL_PRIMARY_ROOT_USER=admin
+#      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+#      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+#    volumes:
+#      - mongodb_secondary_data_1:/bitnami/mongodb
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '1.0'
+#          memory: 2G
+#    ports:
+#      - "27018:27017"
+#    networks:
+#      - microservices-network
+#
+#  mongodb-secondary-2:
+#    image: docker.io/bitnami/mongodb:latest
+#    container_name: mongodb-secondary-2
+#    depends_on:
+#      - mongodb-primary
+#    environment:
+#      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary-2
+#      - MONGODB_REPLICA_SET_MODE=secondary
+#      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+#      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+#      - MONGODB_INITIAL_PRIMARY_ROOT_USER=admin
+#      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+#      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+#    volumes:
+#      - mongodb_secondary_data_2:/bitnami/mongodb
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '1.0'
+#          memory: 2G
+#    ports:
+#      - "27019:27017"
+#    networks:
+#      - microservices-network
+#
+#  mongodb-secondary-3:
+#    image: docker.io/bitnami/mongodb:latest
+#    container_name: mongodb-secondary-3
+#    depends_on:
+#      - mongodb-primary
+#    environment:
+#      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary-3
+#      - MONGODB_REPLICA_SET_MODE=secondary
+#      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+#      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+#      - MONGODB_INITIAL_PRIMARY_ROOT_USER=admin
+#      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+#      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+#    volumes:
+#      - mongodb_secondary_data_3:/bitnami/mongodb
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '1.0'
+#          memory: 2G
+#    ports:
+#      - "27020:27017"
+#    networks:
+#      - microservices-network
 
 volumes:
   kafka_data:
