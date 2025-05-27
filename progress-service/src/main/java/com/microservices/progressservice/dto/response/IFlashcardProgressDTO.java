@@ -12,6 +12,7 @@ public record IFlashcardProgressDTO(
         @Column("answer")               String answer,
         @Column("progress_type")        Boolean statusProgress,
         @Column("marked_for_attention") Boolean statusMark,
-        @Column("image_url")            String imageUrl
+        @Column("image_url")            String imageUrl,
+        @Column("video_url")            String videoUrl
 ) {}
 

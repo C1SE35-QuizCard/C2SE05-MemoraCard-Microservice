@@ -31,7 +31,8 @@ public interface UserProgressR2dbcRepository
            f.answer,
            up.progress_type,
            up.marked_for_attention,
-           f.image_url
+           f.image_url,
+            f.video_url
        FROM flashcards f
        JOIN set_flashcards s ON s.set_id = f.set_id
        JOIN app_users a     ON a.user_id = s.user_id
@@ -57,7 +58,8 @@ public interface UserProgressR2dbcRepository
                f.answer,
                up.progress_type,
                up.marked_for_attention,
-               f.image_url
+               f.image_url,
+                f.video_url
            FROM flashcards f
            JOIN set_flashcards s ON s.set_id = f.set_id
            JOIN app_users a     ON a.user_id = s.user_id
@@ -82,6 +84,7 @@ public interface UserProgressR2dbcRepository
                f.question,
                f.answer,
                f.image_url,
+                f.video_url,
                up.progress_type,
                up.marked_for_attention
            FROM flashcards f
